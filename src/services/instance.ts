@@ -100,7 +100,9 @@ export const sendToInstances = async (
                     is4k: is4k,
                 }
                 if (instance.quality_profile_id) newRequestPayload.profileId = instance.quality_profile_id
-                if (data.seasons) newRequestPayload.seasons = data.seasons
+                if (webhook.media.media_type === "tv") {
+                    newRequestPayload.seasons = data.seasons && data.seasons.length > 0 ? data.seasons : "all"
+                }
 
                 if (logger.isDebugEnabled()) {
                     logger.debug(buildDebugLogMessage("Creating secondary request for instance:", { instance: secondaryItem, newRequestPayload }))
