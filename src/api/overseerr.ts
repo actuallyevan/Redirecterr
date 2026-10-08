@@ -26,7 +26,7 @@ export const fetchFromOverseerr = async (endpoint: string): Promise<any> => {
 /**
  * Approve a request in Overseerr
  */
-export const approveRequest = async (requestId: string): Promise<void> => {
+export const approveRequest = async (requestId: string): Promise<boolean> => {
     try {
         const url = new URL(`/api/v1/request/${requestId}/approve`, config.overseerr_url)
         const response = await fetch(url, { method: "POST", headers: headers })
@@ -36,15 +36,17 @@ export const approveRequest = async (requestId: string): Promise<void> => {
         }
 
         logger.info(`Request ID ${requestId} approved successfully`)
+        return true
     } catch (error) {
         logger.error(`Error approving request: ${error}`)
+        return false
     }
 }
 
 /**
  * Apply configuration to a request in Overseerr
  */
-export const applyConfig = async (requestId: string, postData: Record<string, any>): Promise<void> => {
+export const applyConfig = async (requestId: string, postData: Record<string, any>): Promise<boolean> => {
     try {
         const url = new URL(`/api/v1/request/${requestId}`, config.overseerr_url)
         const response = await fetch(url, {
@@ -58,7 +60,32 @@ export const applyConfig = async (requestId: string, postData: Record<string, an
         }
 
         logger.info(`Configuration applied to request ID ${requestId}`)
+        return true
     } catch (error) {
         logger.error(`Error applying configuration: ${error}`)
+        return false
+    }
+}
+
+/**
+ * Create a new request in Overseerr
+ */
+export const createMediaRequest = async (postData: Record<string, any>): Promise<boolean> => {
+    try {
+        const url = new URL("/api/v1/request", config.overseerr_url)
+        const response = await fetch(url, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(postData),
+        })
+
+        if (!response.ok) {
+            throw new Error(`${response.status} ${response.statusText}`)
+        }
+
+        return true
+    } catch (error) {
+        logger.error(`Error creating request: ${error}`)
+        return false
     }
 }
