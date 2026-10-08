@@ -23,6 +23,16 @@ export const fetchFromOverseerr = async (endpoint: string): Promise<any> => {
     return data
 }
 
+const formatErrorResponse = async (response: Response): Promise<string> => {
+    try {
+        const errorData = await response.json()
+        const message = errorData?.message || (typeof errorData === "string" ? errorData : "")
+        return `${response.status} ${response.statusText}${message ? `: ${message}` : ""}`
+    } catch {
+        return `${response.status} ${response.statusText}`
+    }
+}
+
 /**
  * Approve a request in Overseerr
  */
@@ -32,7 +42,7 @@ export const approveRequest = async (requestId: string): Promise<boolean> => {
         const response = await fetch(url, { method: "POST", headers: headers })
 
         if (!response.ok) {
-            throw new Error(`${response.status} ${response.statusText}`)
+            throw new Error(await formatErrorResponse(response))
         }
 
         logger.info(`Request ID ${requestId} approved successfully`)
@@ -56,7 +66,7 @@ export const applyConfig = async (requestId: string, postData: Record<string, an
         })
 
         if (!response.ok) {
-            throw new Error(`${response.status} ${response.statusText}`)
+            throw new Error(await formatErrorResponse(response))
         }
 
         logger.info(`Configuration applied to request ID ${requestId}`)
@@ -80,7 +90,7 @@ export const createMediaRequest = async (postData: Record<string, any>): Promise
         })
 
         if (!response.ok) {
-            throw new Error(`${response.status} ${response.statusText}`)
+            throw new Error(await formatErrorResponse(response))
         }
 
         return true
